@@ -13,6 +13,15 @@ public class SolrQueryUtil {
 		}
 	}
 	
+	public static void setStringStartsWithQuery(SolrQuery query, String key, String value) {
+		if (value != null) {
+			value = value.trim();
+			if (!"".equals(value)) {
+				query.setQuery(key + ":" +value+"*");
+			}
+		}
+	}
+	
 	public static void setNumberQuery(SolrQuery query, String key, Number value) {
 		if (value != null && value.longValue() > 0) {
 			query.setQuery(key + ":" + value);

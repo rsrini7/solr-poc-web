@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.ServletException;
+
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -25,7 +27,7 @@ public class SolrClientUtil {
 	}
 
 
-	public Map<String, Object> query(SolrQuery solrQuery, Class<?> beanClass) {
+	public Map<String, Object> query(SolrQuery solrQuery, Class<?> beanClass) throws ServletException {
 		Map<String, Object> result = new HashMap<String, Object>();
 		List<?> list = null;
 		try {
@@ -35,6 +37,7 @@ public class SolrClientUtil {
 			result.put("datas", list);
 		} catch (SolrServerException e) {
 			e.printStackTrace();
+			throw new ServletException("Unable to connect Solr");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

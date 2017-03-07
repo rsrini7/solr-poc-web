@@ -45,6 +45,12 @@ public class SearchServlet extends HttpServlet {
 		SolrQuery solrQuery = new SolrQuery();
 		try{
 			Map<ClientInfo, String> params = getParams(request,response);
+			String queryType = request.getParameter("querytype");
+			if(queryType == null || queryType.trim().equals("")){
+				queryType = "P";
+			}else{
+				queryType = queryType.toUpperCase();
+			}
 			int startPos = 0;
 			int endPos = 10;
 			try{
@@ -56,19 +62,33 @@ public class SearchServlet extends HttpServlet {
 			
 			SolrQueryUtil.setQueryPage(solrQuery, startPos, endPos);
 			
-			SolrQueryUtil.setStringPartialQuery(solrQuery, ClientInfo.FIRST_NAME.getName(), params.get(ClientInfo.FIRST_NAME));
-			SolrQueryUtil.setStringPartialQuery(solrQuery, ClientInfo.LAST_NAME.getName(), params.get(ClientInfo.LAST_NAME));
-			SolrQueryUtil.setStringPartialQuery(solrQuery, ClientInfo.MIDDLE_NAME.getName(), params.get(ClientInfo.MIDDLE_NAME));
-			SolrQueryUtil.setStringPartialQuery(solrQuery, ClientInfo.CLIENT_TYPE.getName(), params.get(ClientInfo.CLIENT_TYPE));
-			SolrQueryUtil.setStringPartialQuery(solrQuery, ClientInfo.ENTITY_NAME.getName(), params.get(ClientInfo.ENTITY_NAME));
-			SolrQueryUtil.setStringPartialQuery(solrQuery, ClientInfo.COUNTRY.getName(), params.get(ClientInfo.COUNTRY));
-			SolrQueryUtil.setStringPartialQuery(solrQuery, ClientInfo.REGION.getName(), params.get(ClientInfo.REGION));
-			SolrQueryUtil.setStringPartialQuery(solrQuery, ClientInfo.DOB.getName(), params.get(ClientInfo.DOB));
-			SolrQueryUtil.setStringPartialQuery(solrQuery, ClientInfo.ACCOUNT_NO.getName(), params.get(ClientInfo.ACCOUNT_NO));
-			SolrQueryUtil.setStringPartialQuery(solrQuery, ClientInfo.BUSINESS_ID.getName(), params.get(ClientInfo.BUSINESS_ID));
-			SolrQueryUtil.setStringPartialQuery(solrQuery, ClientInfo.GOVT_ID.getName(), params.get(ClientInfo.GOVT_ID));
-			SolrQueryUtil.setStringPartialQuery(solrQuery, ClientInfo.SOURCE.getName(), params.get(ClientInfo.SOURCE));
-			
+			if(QueryType.S.name().equals(queryType)){
+				SolrQueryUtil.setStringStartsWithQuery(solrQuery, ClientInfo.FIRST_NAME.getName(), params.get(ClientInfo.FIRST_NAME));
+				SolrQueryUtil.setStringStartsWithQuery(solrQuery, ClientInfo.LAST_NAME.getName(), params.get(ClientInfo.LAST_NAME));
+				SolrQueryUtil.setStringStartsWithQuery(solrQuery, ClientInfo.MIDDLE_NAME.getName(), params.get(ClientInfo.MIDDLE_NAME));
+				SolrQueryUtil.setStringStartsWithQuery(solrQuery, ClientInfo.CLIENT_TYPE.getName(), params.get(ClientInfo.CLIENT_TYPE));
+				SolrQueryUtil.setStringStartsWithQuery(solrQuery, ClientInfo.ENTITY_NAME.getName(), params.get(ClientInfo.ENTITY_NAME));
+				SolrQueryUtil.setStringStartsWithQuery(solrQuery, ClientInfo.COUNTRY.getName(), params.get(ClientInfo.COUNTRY));
+				SolrQueryUtil.setStringStartsWithQuery(solrQuery, ClientInfo.REGION.getName(), params.get(ClientInfo.REGION));
+				SolrQueryUtil.setStringStartsWithQuery(solrQuery, ClientInfo.DOB.getName(), params.get(ClientInfo.DOB));
+				SolrQueryUtil.setStringStartsWithQuery(solrQuery, ClientInfo.ACCOUNT_NO.getName(), params.get(ClientInfo.ACCOUNT_NO));
+				SolrQueryUtil.setStringStartsWithQuery(solrQuery, ClientInfo.BUSINESS_ID.getName(), params.get(ClientInfo.BUSINESS_ID));
+				SolrQueryUtil.setStringStartsWithQuery(solrQuery, ClientInfo.GOVT_ID.getName(), params.get(ClientInfo.GOVT_ID));
+				SolrQueryUtil.setStringStartsWithQuery(solrQuery, ClientInfo.SOURCE.getName(), params.get(ClientInfo.SOURCE));
+			}else {
+				SolrQueryUtil.setStringPartialQuery(solrQuery, ClientInfo.FIRST_NAME.getName(), params.get(ClientInfo.FIRST_NAME));
+				SolrQueryUtil.setStringPartialQuery(solrQuery, ClientInfo.LAST_NAME.getName(), params.get(ClientInfo.LAST_NAME));
+				SolrQueryUtil.setStringPartialQuery(solrQuery, ClientInfo.MIDDLE_NAME.getName(), params.get(ClientInfo.MIDDLE_NAME));
+				SolrQueryUtil.setStringPartialQuery(solrQuery, ClientInfo.CLIENT_TYPE.getName(), params.get(ClientInfo.CLIENT_TYPE));
+				SolrQueryUtil.setStringPartialQuery(solrQuery, ClientInfo.ENTITY_NAME.getName(), params.get(ClientInfo.ENTITY_NAME));
+				SolrQueryUtil.setStringPartialQuery(solrQuery, ClientInfo.COUNTRY.getName(), params.get(ClientInfo.COUNTRY));
+				SolrQueryUtil.setStringPartialQuery(solrQuery, ClientInfo.REGION.getName(), params.get(ClientInfo.REGION));
+				SolrQueryUtil.setStringPartialQuery(solrQuery, ClientInfo.DOB.getName(), params.get(ClientInfo.DOB));
+				SolrQueryUtil.setStringPartialQuery(solrQuery, ClientInfo.ACCOUNT_NO.getName(), params.get(ClientInfo.ACCOUNT_NO));
+				SolrQueryUtil.setStringPartialQuery(solrQuery, ClientInfo.BUSINESS_ID.getName(), params.get(ClientInfo.BUSINESS_ID));
+				SolrQueryUtil.setStringPartialQuery(solrQuery, ClientInfo.GOVT_ID.getName(), params.get(ClientInfo.GOVT_ID));
+				SolrQueryUtil.setStringPartialQuery(solrQuery, ClientInfo.SOURCE.getName(), params.get(ClientInfo.SOURCE));
+			}
 			
 			Map<String, Object> query = clientUtil.query(solrQuery, ClientInfoBean.class);
 			@SuppressWarnings("unchecked")
@@ -90,7 +110,7 @@ public class SearchServlet extends HttpServlet {
 		Map<String, String[]> parameterMap = request.getParameterMap();
 		for(Map.Entry<String, String[]> entry : parameterMap.entrySet()){
 			try{
-				if(!entry.getKey().equals("start") && !entry.getKey().equals("end")){
+				if(!entry.getKey().equals("start") && !entry.getKey().equals("end")  && !entry.getKey().equals("querytype")){
 					paramMap.put(ClientInfo.valueOf(entry.getKey().toUpperCase()), entry.getValue()[0]);
 				}
 			}catch (IllegalArgumentException e) {
@@ -106,6 +126,10 @@ public class SearchServlet extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
 		doGet(request, response);
+	}
+	
+	enum QueryType{
+		P,E,S
 	}
 
 }
