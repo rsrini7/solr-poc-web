@@ -15,6 +15,7 @@ import org.apache.solr.client.solrj.SolrQuery;
 
 import com.srini.search.bean.ClientInfo;
 import com.srini.search.bean.ClientInfoBean;
+import com.srini.search.util.ResultKeys;
 import com.srini.search.util.SolrClientFactory;
 import com.srini.search.util.SolrClientUtil;
 import com.srini.search.util.SolrQueryUtil;
@@ -30,7 +31,6 @@ public class SearchServlet extends HttpServlet {
      */
     public SearchServlet() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
 	/**
@@ -57,12 +57,25 @@ public class SearchServlet extends HttpServlet {
 				startPos = Integer.parseInt(request.getParameter("start"));
 				endPos = Integer.parseInt(request.getParameter("end"));
 			}catch (Exception e) {
-				// TODO: handle exception
+				// Ignore
 			}
 			
 			SolrQueryUtil.setQueryPage(solrQuery, startPos, endPos);
 			
-			if(QueryType.S.name().equals(queryType)){
+			if(QueryType.E.name().equals(queryType)){
+				SolrQueryUtil.setStringEqualsQuery(solrQuery, ClientInfo.FIRST_NAME.getName(), params.get(ClientInfo.FIRST_NAME));
+				SolrQueryUtil.setStringEqualsQuery(solrQuery, ClientInfo.LAST_NAME.getName(), params.get(ClientInfo.LAST_NAME));
+				SolrQueryUtil.setStringEqualsQuery(solrQuery, ClientInfo.MIDDLE_NAME.getName(), params.get(ClientInfo.MIDDLE_NAME));
+				SolrQueryUtil.setStringEqualsQuery(solrQuery, ClientInfo.CLIENT_TYPE.getName(), params.get(ClientInfo.CLIENT_TYPE));
+				SolrQueryUtil.setStringEqualsQuery(solrQuery, ClientInfo.ENTITY_NAME.getName(), params.get(ClientInfo.ENTITY_NAME));
+				SolrQueryUtil.setStringEqualsQuery(solrQuery, ClientInfo.COUNTRY.getName(), params.get(ClientInfo.COUNTRY));
+				SolrQueryUtil.setStringEqualsQuery(solrQuery, ClientInfo.REGION.getName(), params.get(ClientInfo.REGION));
+				SolrQueryUtil.setStringEqualsQuery(solrQuery, ClientInfo.DOB.getName(), params.get(ClientInfo.DOB));
+				SolrQueryUtil.setStringEqualsQuery(solrQuery, ClientInfo.ACCOUNT_NO.getName(), params.get(ClientInfo.ACCOUNT_NO));
+				SolrQueryUtil.setStringEqualsQuery(solrQuery, ClientInfo.BUSINESS_ID.getName(), params.get(ClientInfo.BUSINESS_ID));
+				SolrQueryUtil.setStringEqualsQuery(solrQuery, ClientInfo.GOVT_ID.getName(), params.get(ClientInfo.GOVT_ID));
+				SolrQueryUtil.setStringEqualsQuery(solrQuery, ClientInfo.SOURCE.getName(), params.get(ClientInfo.SOURCE));
+			}else if(QueryType.S.name().equals(queryType)){
 				SolrQueryUtil.setStringStartsWithQuery(solrQuery, ClientInfo.FIRST_NAME.getName(), params.get(ClientInfo.FIRST_NAME));
 				SolrQueryUtil.setStringStartsWithQuery(solrQuery, ClientInfo.LAST_NAME.getName(), params.get(ClientInfo.LAST_NAME));
 				SolrQueryUtil.setStringStartsWithQuery(solrQuery, ClientInfo.MIDDLE_NAME.getName(), params.get(ClientInfo.MIDDLE_NAME));
@@ -90,13 +103,22 @@ public class SearchServlet extends HttpServlet {
 				SolrQueryUtil.setStringPartialQuery(solrQuery, ClientInfo.SOURCE.getName(), params.get(ClientInfo.SOURCE));
 			}
 			
-			Map<String, Object> query = clientUtil.query(solrQuery, ClientInfoBean.class);
+			Map<ResultKeys, Object> resultMap = clientUtil.query(solrQuery, ClientInfoBean.class);
+			
+			response.getWriter().append("Total Number of Records Found : "+resultMap.get(ResultKeys.TOTAL_NO_OF_RECORDS)+"\n");
+			response.getWriter().append("Total Time Taken : "+resultMap.get(ResultKeys.TOTAL_TIME_TAKEN)+" msec\n");
+			response.getWriter().append("\n *** Result Data ***\n\n");
+			
 			@SuppressWarnings("unchecked")
-			List<ClientInfoBean> list = (List<ClientInfoBean>)query.get("datas");
-			for(ClientInfoBean info : list){
-				response.getWriter().append("data: ").append(info.toString()).append("\n");
+			List<ClientInfoBean> list = (List<ClientInfoBean>)resultMap.get(ResultKeys.DATA);
+			if(list!=null && !list.isEmpty()){
+				for(ClientInfoBean info : list){
+					response.getWriter().append("data: ").append(info.toString()).append("\n");
+				}
+			}else{
+				response.getWriter().append("No Data Found.");
 			}
-
+			
 			request.setAttribute("result", list);
 			
 		}catch (Exception e) {
@@ -131,5 +153,4 @@ public class SearchServlet extends HttpServlet {
 	enum QueryType{
 		P,E,S
 	}
-
 }

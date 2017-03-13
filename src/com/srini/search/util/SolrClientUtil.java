@@ -27,14 +27,15 @@ public class SolrClientUtil {
 	}
 
 
-	public Map<String, Object> query(SolrQuery solrQuery, Class<?> beanClass) throws ServletException {
-		Map<String, Object> result = new HashMap<String, Object>();
+	public Map<ResultKeys, Object> query(SolrQuery solrQuery, Class<?> beanClass) throws ServletException {
+		Map<ResultKeys, Object> result = new HashMap<ResultKeys, Object>();
 		List<?> list = null;
 		try {
 			QueryResponse queryResponse = solrClient.query(collection, solrQuery);
 			list = queryResponse.getBeans(beanClass);
-			result.put("numFound", queryResponse.getResults().getNumFound());
-			result.put("datas", list);
+			result.put(ResultKeys.TOTAL_TIME_TAKEN, queryResponse.getElapsedTime());
+			result.put(ResultKeys.TOTAL_NO_OF_RECORDS, queryResponse.getResults().getNumFound());
+			result.put(ResultKeys.DATA, list);
 		} catch (SolrServerException e) {
 			e.printStackTrace();
 			throw new ServletException("Unable to connect Solr");
